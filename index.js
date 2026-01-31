@@ -11,6 +11,9 @@ const PORT = process.env.PORT || 3000;
 // Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
+// Serve Ultraviolet /service prefix
+app.use("/service", express.static(path.join(__dirname, "public")));
+
 app.listen(PORT, () => {
   console.log(`🚀 ApolloOS running on port ${PORT}`);
 });
