@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // Proxy identifier
 const PROXY_ID = "ApolloOS";
 
-// Home page with URL input and particles
+// Home page
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -19,8 +19,23 @@ app.get("/", (req, res) => {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-      body { margin:0; height:100vh; background:black; color:#00f0ff; font-family:'Press Start 2P', cursive; overflow:hidden; }
-      canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+      body {
+        margin:0;
+        height:100vh;
+        background:black;
+        color:#00f0ff;
+        font-family:'Press Start 2P', cursive;
+        overflow:hidden;
+      }
+
+      canvas {
+        position: fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        z-index:0;
+      }
 
       .overlay {
         position: relative;
@@ -29,11 +44,27 @@ app.get("/", (req, res) => {
         margin-top: 50px;
       }
 
-      h1 { font-size:3em; color:#00f0ff; text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff; }
+      h1 {
+        font-size:3em;
+        color:#00f0ff;
+        text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff;
+      }
+
       p { font-size:0.9em; }
       form { margin-top:30px; }
-      input[type=text] { width:300px; font-family:'Press Start 2P'; font-size:0.9em; padding:5px; }
-      input[type=submit] { font-family:'Press Start 2P'; font-size:0.9em; padding:5px 10px; margin-left:10px; cursor:pointer; }
+      input[type=text] {
+        width:300px;
+        font-family:'Press Start 2P';
+        font-size:0.9em;
+        padding:5px;
+      }
+      input[type=submit] {
+        font-family:'Press Start 2P';
+        font-size:0.9em;
+        padding:5px 10px;
+        margin-left:10px;
+        cursor:pointer;
+      }
     </style>
   </head>
   <body>
@@ -56,9 +87,11 @@ app.get("/", (req, res) => {
       const particles = [];
       const particleCount = 100;
 
-      function random(min,max){return Math.random()*(max-min)+min}
+      function random(min,max){ return Math.random()*(max-min)+min }
 
-      class Particle{
-        constructor(){this.reset()}
-        reset(){this.x=random(0,width);this.y=random(0,height);this.size=random(1,3);this.speedX=random(-0.5,0.5);this.speedY=random(-0.5,0.5)}
-        update(){this.x+=this.speedX;this.y+=this
+      class Particle {
+        constructor(){ this.reset() }
+        reset() {
+          this.x=random(0,width);
+          this.y=random(0,height);
+          this.size=random(1,3);
