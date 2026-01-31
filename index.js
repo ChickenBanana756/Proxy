@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000;
 // Proxy identifier
 const PROXY_ID = "ApolloOS";
 
-// Serve home page with input box
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -20,22 +19,35 @@ app.get("/", (req, res) => {
       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
       body { margin:0; height:100vh; background:black; color:#00f0ff; font-family:'Press Start 2P', cursive; overflow:hidden; }
-      h1 { text-align:center; font-size:3em; margin-top:50px; color:#00f0ff; text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff; }
-      p { text-align:center; font-size:0.9em; }
-      form { text-align:center; margin-top:30px; }
+      canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+
+      .overlay {
+        position: relative;
+        z-index: 10;
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      h1 { font-size:3em; color:#00f0ff; text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff; }
+
+      p { font-size:0.9em; }
+
+      form { margin-top:30px; }
       input[type=text] { width:300px; font-family:'Press Start 2P'; font-size:0.9em; padding:5px; }
       input[type=submit] { font-family:'Press Start 2P'; font-size:0.9em; padding:5px 10px; margin-left:10px; cursor:pointer; }
-      canvas { position: fixed; top:0; left:0; }
     </style>
   </head>
   <body>
     <canvas id="particles"></canvas>
-    <h1>ApolloOS</h1>
-    <p>Type a website URL and click Visit (only sites that allow ApolloOS will load)</p>
-    <form method="GET" action="/site">
-      <input type="text" name="target" placeholder="https://example.com" required />
-      <input type="submit" value="Visit" />
-    </form>
+
+    <div class="overlay">
+      <h1>ApolloOS</h1>
+      <p>Type a website URL and click Visit (only sites that allow ApolloOS will load)</p>
+      <form method="GET" action="/site">
+        <input type="text" name="target" placeholder="https://example.com" required />
+        <input type="submit" value="Visit" />
+      </form>
+    </div>
 
     <script>
       const canvas = document.getElementById('particles');
@@ -67,16 +79,14 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Proxy route: GET /site?target=URL
+// Proxy route
 app.get("/site", async (req, res, next) => {
   let target = req.query.target;
   if (!target) return res.redirect("/");
 
-  // Add protocol if missing
   if (!/^https?:\/\//.test(target)) target = "http://" + target;
 
   try {
-    // Check for X-Allow-Proxy header
     const response = await fetch(target, { method: "HEAD" });
     const allowHeader = response.headers.get("x-allow-proxy");
 
@@ -84,7 +94,6 @@ app.get("/site", async (req, res, next) => {
       return res.status(403).send("⛔ This website has NOT opted in to be proxied.");
     }
 
-    // Proxy the site
     return createProxyMiddleware({
       target,
       changeOrigin: true,
@@ -98,7 +107,4 @@ app.get("/site", async (req, res, next) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`ApolloOS proxy running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`ApolloOS running on port ${PORT}`));
