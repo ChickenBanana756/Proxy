@@ -32,7 +32,7 @@ canvas {
   position:relative;
   z-index:2;
   text-align:center;
-  padding-top:40px;
+  padding-top:30px;
 }
 
 h1 {
@@ -54,7 +54,7 @@ button {
 
 iframe {
   width:100%;
-  height:calc(100vh - 220px);
+  height:calc(100vh - 200px);
   border:none;
   margin-top:20px;
   background:black;
@@ -68,12 +68,12 @@ iframe {
 
 <div class="ui">
   <h1>ApolloOS</h1>
-  <p>Powered by CroxyProxy</p>
+  <p>Proxy powered by ProxySite</p>
 
   <input id="url" placeholder="https://coolmathgames.com">
   <button onclick="browse()">Visit</button>
 
-  <iframe id="browser"></iframe>
+  <iframe id="browser" src="https://www.proxysite.com/"></iframe>
 </div>
 
 <script>
@@ -82,10 +82,13 @@ function browse(){
   if(!url) return;
   if(!url.startsWith("http")) url = "https://" + url;
 
-  const croxyUrl = "https://www.croxyproxy.com/" + url;
-  document.getElementById("browser").src = croxyUrl;
+  // Load ProxySite with intent to browse
+  document.getElementById("browser").src =
+    "https://www.proxysite.com/";
 }
+</script>
 
+<script>
 // particles
 const c = document.getElementById("bg");
 const ctx = c.getContext("2d");
