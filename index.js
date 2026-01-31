@@ -14,84 +14,22 @@ app.get("/", (req, res) => {
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-      body {
-        margin:0;
-        height:100vh;
-        background:black;
-        color:#00f0ff;
-        font-family:'Press Start 2P', cursive;
-        overflow:hidden;
-      }
+      body { margin:0; height:100vh; background:black; color:#00f0ff; font-family:'Press Start 2P', cursive; overflow:hidden; }
+      canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
 
-      canvas {
-        position: fixed;
-        top:0;
-        left:0;
-        width:100%;
-        height:100%;
-        z-index:0;
-      }
+      .overlay { position: relative; z-index:10; text-align:center; margin-top:50px; }
 
-      .overlay {
-        position: relative;
-        z-index: 10;
-        text-align: center;
-        margin-top: 50px;
-      }
-
-      h1 {
-        font-size:3em;
-        color:#00f0ff;
-        text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff;
-      }
-
+      h1 { font-size:3em; color:#00f0ff; text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff; }
       p { font-size:0.9em; }
-
       form { margin-top:30px; }
-      input[type=text] {
-        width:300px;
-        font-family:'Press Start 2P';
-        font-size:0.9em;
-        padding:5px;
-      }
-      input[type=submit] {
-        font-family:'Press Start 2P';
-        font-size:0.9em;
-        padding:5px 10px;
-        margin-left:10px;
-        cursor:pointer;
-      }
+      input[type=text] { width:300px; font-family:'Press Start 2P'; font-size:0.9em; padding:5px; }
+      input[type=submit] { font-family:'Press Start 2P'; font-size:0.9em; padding:5px 10px; margin-left:10px; cursor:pointer; }
 
-      .cards {
-        margin-top:40px;
-        display:flex;
-        justify-content:center;
-        flex-wrap:wrap;
-        gap:20px;
-      }
+      .cards { margin-top:40px; display:flex; justify-content:center; flex-wrap:wrap; gap:20px; }
+      .card { background:#111; border:2px solid #00f0ff; padding:15px; width:250px; text-align:center; cursor:pointer; transition:0.2s; }
+      .card:hover { background:#00f0ff; color:black; transform:scale(1.05); }
 
-      .card {
-        background:#111;
-        border:2px solid #00f0ff;
-        padding:15px;
-        width:250px;
-        text-align:center;
-        cursor:pointer;
-        transition:0.2s;
-      }
-      .card:hover {
-        background:#00f0ff;
-        color:black;
-        transform:scale(1.05);
-      }
-
-      iframe {
-        width:80%;
-        height:500px;
-        margin-top:30px;
-        border:none;
-      }
-
+      iframe { width:80%; height:500px; margin-top:30px; border:none; }
     </style>
   </head>
   <body>
@@ -101,14 +39,14 @@ app.get("/", (req, res) => {
       <h1>ApolloOS</h1>
       <p>Type a URL or click a demo site below</p>
       <form id="urlForm">
-        <input type="text" id="urlInput" placeholder="https://example.com" required />
+        <input type="text" id="urlInput" placeholder="https://example.com" />
         <input type="submit" value="Visit" />
       </form>
 
       <div class="cards">
-        <div class="card" onclick="loadDemo('youtube')">YouTube</div>
-        <div class="card" onclick="loadDemo('coolmath')">CoolMathGames</div>
-        <div class="card" onclick="loadDemo('crazygames')">CrazyGames</div>
+        <div class="card" onclick="loadDemo('youtube')">YouTube Video</div>
+        <div class="card" onclick="loadDemo('mathgame')">Playable Math Game</div>
+        <div class="card" onclick="loadDemo('snake')">Snake Game</div>
       </div>
 
       <div id="demoContainer"></div>
@@ -135,7 +73,7 @@ app.get("/", (req, res) => {
       animate();
       window.addEventListener('resize',()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight});
 
-      // URL input form
+      // URL form
       const form = document.getElementById('urlForm');
       const input = document.getElementById('urlInput');
       const demoContainer = document.getElementById('demoContainer');
@@ -143,16 +81,19 @@ app.get("/", (req, res) => {
       form.addEventListener('submit', (e)=>{
         e.preventDefault();
         const url = input.value;
-        demoContainer.innerHTML = '<iframe src="'+url+'"></iframe>';
+        if(url) {
+          demoContainer.innerHTML = '<iframe src="'+url+'" allowfullscreen></iframe>';
+        }
       });
 
-      // Demo site loader
+      // Demo loader
       function loadDemo(site){
         let url = '';
         if(site==='youtube') url='https://www.youtube.com/embed/dQw4w9WgXcQ';
-        else if(site==='coolmath') url='https://www.coolmathgames.com/';
-        else if(site==='crazygames') url='https://www.crazygames.com/';
-        demoContainer.innerHTML = '<iframe src="'+url+'"></iframe>';
+        else if(site==='mathgame') url='https://www.coolmathgames.com/0-candy-chase'; // example playable game
+        else if(site==='snake') url='https://playsnake.org/';
+
+        demoContainer.innerHTML = '<iframe src="'+url+'" allowfullscreen></iframe>';
       }
     </script>
   </body>
