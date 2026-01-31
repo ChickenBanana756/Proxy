@@ -38,18 +38,33 @@ iframe {
   border: none;
   margin-top: 20px;
 }
+
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.overlay {
+  position: relative;
+  z-index: 2;
+}
 </style>
 </head>
 
 <body>
+
+<canvas id="bg"></canvas>
+
+<div class="overlay">
 <h1>ApolloOS</h1>
 
 <input id="url" placeholder="https://coolmathgames.com">
 <button onclick="go()">Visit</button>
 
 <iframe id="frame"></iframe>
+</div>
 
-<script src="/uv/uv.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@titaniumnetwork-dev/ultraviolet/dist/uv.bundle.js"></script>
 <script src="/uv/uv.config.js"></script>
 
 <script>
@@ -61,6 +76,43 @@ function go() {
   document.getElementById("frame").src =
     __uv$config.prefix + __uv$config.encodeUrl(url);
 }
+
+// Particles background
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+let width = c.width = window.innerWidth;
+let height = c.height = window.innerHeight;
+
+const dots = Array.from({length:120}, () => ({
+  x: Math.random()*width,
+  y: Math.random()*height,
+  vx: (Math.random()-0.5)*0.5,
+  vy: (Math.random()-0.5)*0.5
+}));
+
+function animate() {
+  ctx.clearRect(0,0,width,height);
+  ctx.fillStyle = "#00f0ff";
+  dots.forEach(d=>{
+    d.x += d.vx;
+    d.y += d.vy;
+    if(d.x<0||d.x>width||d.y<0||d.y>height){
+      d.x = Math.random()*width;
+      d.y = Math.random()*height;
+    }
+    ctx.beginPath();
+    ctx.arc(d.x,d.y,2,0,Math.PI*2);
+    ctx.fill();
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  width = c.width = window.innerWidth;
+  height = c.height = window.innerHeight;
+});
 </script>
+
 </body>
 </html>
