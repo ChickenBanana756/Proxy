@@ -5,13 +5,14 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Proxy identifier
+// Proxy identifier (must match X-Allow-Proxy header on allowed sites)
 const PROXY_ID = "ApolloOS";
 
-// Middleware to parse URL-encoded form data
+// Middleware to parse URL-encoded and JSON data (for future forms if needed)
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Home page with input form
+// Home page with video game font, black background, blue floating particles, and URL input
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -35,8 +36,8 @@ app.get("/", (req, res) => {
     <canvas id="particles"></canvas>
     <h1>ApolloOS</h1>
     <p>Type a website URL and press Enter (only sites that allow ApolloOS will load)</p>
-    <form method="POST" action="/visit">
-      <input type="text" name="site" placeholder="https://example.com" required />
+    <form method="GET" action="/visit">
+      <input type="text" name="url" placeholder="https://example.com" required />
       <input type="submit" value="Visit" />
     </form>
 
@@ -47,11 +48,22 @@ app.get("/", (req, res) => {
       let height = canvas.height = window.innerHeight;
       const particles = [];
       const particleCount = 100;
+
       function random(min,max){return Math.random()*(max-min)+min}
-      class Particle{constructor(){this.reset()}reset(){this.x=random(0,width);this.y=random(0,height);this.size=random(1,3);this.speedX=random(-0.5,0.5);this.speedY=random(-0.5,0.5)}update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>width||this.y<0||this.y>height)this.reset()}draw(){ctx.fillStyle='#00f0ff';ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill()}}
+
+      class Particle{
+        constructor(){this.reset()}
+        reset(){this.x=random(0,width);this.y=random(0,height);this.size=random(1,3);this.speedX=random(-0.5,0.5);this.speedY=random(-0.5,0.5)}
+        update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>width||this.y<0||this.y>height)this.reset()}
+        draw(){ctx.fillStyle='#00f0ff';ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill()}
+      }
+
       for(let i=0;i<particleCount;i++){particles.push(new Particle())}
+
       function animate(){ctx.clearRect(0,0,width,height);particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(animate)}
+
       animate();
+
       window.addEventListener('resize',()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight});
     </script>
   </body>
@@ -59,19 +71,28 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Handle URL form submission
-app.post("/visit", (req, res) => {
-  let siteUrl = req.body.site;
-  if (!/^https?:\/\//.test(siteUrl)) siteUrl = "http://" + siteUrl; // prepend protocol if missing
+// Handle the form submission (typed URL)
+app.get("/visit", (req, res) => {
+  let siteUrl = req.query.url;
+  if (!siteUrl) return res.redirect("/");
+
+  // Prepend protocol if missing
+  if (!/^https?:\/\//.test(siteUrl)) siteUrl = "http://" + siteUrl;
+
+  // Encode URL as query parameter
   const encoded = encodeURIComponent(siteUrl);
-  res.redirect(`/site/${encoded}`);
+  res.redirect(`/site?target=${encoded}`);
 });
 
-// Proxy route
-app.use("/site/:site", async (req, res, next) => {
-  let target = decodeURIComponent(req.params.site);
+// Proxy route (reads target URL from query parameter)
+app.use("/site", async (req, res, next) => {
+  let target = req.query.target;
+  if (!target) return res.redirect("/");
+
+  target = decodeURIComponent(target);
 
   try {
+    // Check owner permission header
     const response = await fetch(target, { method: "HEAD" });
     const allowHeader = response.headers.get("x-allow-proxy");
 
@@ -79,11 +100,12 @@ app.use("/site/:site", async (req, res, next) => {
       return res.status(403).send("⛔ This website has NOT opted in to be proxied.");
     }
 
+    // Proxy the site
     return createProxyMiddleware({
       target,
       changeOrigin: true,
       secure: true,
-      pathRewrite: { [`^/site/${req.params.site}`]: "" }
+      pathRewrite: { '^/site': '' }
     })(req, res, next);
 
   } catch (err) {
@@ -92,7 +114,7 @@ app.use("/site/:site", async (req, res, next) => {
   }
 });
 
-// Start server
+// Start the server
 app.listen(PORT, () => {
   console.log(`ApolloOS proxy running on port ${PORT}`);
 });
