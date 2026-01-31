@@ -3,102 +3,142 @@ import express from "express";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Home page
 app.get("/", (req, res) => {
   res.send(`
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>ApolloOS</title>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ApolloOS</title>
 
-      body { margin:0; height:100vh; background:black; color:#00f0ff; font-family:'Press Start 2P', cursive; overflow:hidden; }
-      canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-      .overlay { position: relative; z-index:10; text-align:center; margin-top:50px; }
+body {
+  margin:0;
+  background:black;
+  color:#00f0ff;
+  font-family:'Press Start 2P', cursive;
+  overflow:hidden;
+}
 
-      h1 { font-size:3em; color:#00f0ff; text-shadow:0 0 10px #00f0ff,0 0 20px #00f0ff; }
-      p { font-size:0.9em; }
-      form { margin-top:30px; }
-      input[type=text] { width:300px; font-family:'Press Start 2P'; font-size:0.9em; padding:5px; }
-      input[type=submit] { font-family:'Press Start 2P'; font-size:0.9em; padding:5px 10px; margin-left:10px; cursor:pointer; }
+canvas {
+  position:fixed;
+  inset:0;
+}
 
-      .cards { margin-top:40px; display:flex; justify-content:center; flex-wrap:wrap; gap:20px; }
-      .card { background:#111; border:2px solid #00f0ff; padding:15px; width:250px; text-align:center; cursor:pointer; transition:0.2s; }
-      .card:hover { background:#00f0ff; color:black; transform:scale(1.05); }
+.container {
+  position:relative;
+  z-index:2;
+  text-align:center;
+  margin-top:80px;
+}
 
-      iframe { width:80%; height:500px; margin-top:30px; border:none; }
-    </style>
-  </head>
-  <body>
-    <canvas id="particles"></canvas>
+h1 {
+  font-size:3em;
+  text-shadow:0 0 15px #00f0ff;
+}
 
-    <div class="overlay">
-      <h1>ApolloOS</h1>
-      <p>Type a URL or click a demo site below</p>
-      <form id="urlForm">
-        <input type="text" id="urlInput" placeholder="https://example.com" />
-        <input type="submit" value="Visit" />
-      </form>
+input {
+  width:340px;
+  padding:10px;
+  font-family:'Press Start 2P';
+}
 
-      <div class="cards">
-        <div class="card" onclick="loadDemo('youtube')">YouTube Video</div>
-        <div class="card" onclick="loadDemo('mathgame')">Playable Math Game</div>
-        <div class="card" onclick="loadDemo('snake')">Snake Game</div>
-      </div>
+button {
+  margin-left:10px;
+  padding:10px 15px;
+  font-family:'Press Start 2P';
+  cursor:pointer;
+}
 
-      <div id="demoContainer"></div>
-    </div>
+.cards {
+  margin-top:40px;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
 
-    <script>
-      // Particles
-      const canvas = document.getElementById('particles');
-      const ctx = canvas.getContext('2d');
-      let width = canvas.width = window.innerWidth;
-      let height = canvas.height = window.innerHeight;
-      const particles = [];
-      const particleCount = 100;
+.card {
+  border:2px solid #00f0ff;
+  padding:15px;
+  cursor:pointer;
+}
 
-      function random(min,max){return Math.random()*(max-min)+min}
-      class Particle{
-        constructor(){this.reset()}
-        reset(){this.x=random(0,width);this.y=random(0,height);this.size=random(1,3);this.speedX=random(-0.5,0.5);this.speedY=random(-0.5,0.5)}
-        update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>width||this.y<0||this.y>height)this.reset()}
-        draw(){ctx.fillStyle='#00f0ff';ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill()}
-      }
-      for(let i=0;i<particleCount;i++){particles.push(new Particle())}
-      function animate(){ctx.clearRect(0,0,width,height);particles.forEach(p=>{p.update();p.draw()});requestAnimationFrame(animate)}
-      animate();
-      window.addEventListener('resize',()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight});
+.card:hover {
+  background:#00f0ff;
+  color:black;
+}
+</style>
+</head>
 
-      // URL form
-      const form = document.getElementById('urlForm');
-      const input = document.getElementById('urlInput');
-      const demoContainer = document.getElementById('demoContainer');
+<body>
 
-      form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const url = input.value;
-        if(url) {
-          demoContainer.innerHTML = '<iframe src="'+url+'" allowfullscreen></iframe>';
-        }
-      });
+<canvas id="bg"></canvas>
 
-      // Demo loader
-      function loadDemo(site){
-        let url = '';
-        if(site==='youtube') url='https://www.youtube.com/embed/dQw4w9WgXcQ';
-        else if(site==='mathgame') url='https://www.coolmathgames.com/0-candy-chase'; // example playable game
-        else if(site==='snake') url='https://playsnake.org/';
+<div class="container">
+  <h1>ApolloOS</h1>
+  <p>Type a website or click a card</p>
 
-        demoContainer.innerHTML = '<iframe src="'+url+'" allowfullscreen></iframe>';
-      }
-    </script>
-  </body>
-  </html>
-  `);
+  <input id="url" placeholder="https://coolmathgames.com">
+  <button onclick="visit()">Visit</button>
+
+  <div class="cards">
+    <div class="card" onclick="openSite('https://www.coolmathgames.com')">CoolMathGames</div>
+    <div class="card" onclick="openSite('https://www.crazygames.com')">CrazyGames</div>
+    <div class="card" onclick="openSite('https://www.youtube.com')">YouTube</div>
+  </div>
+</div>
+
+<script>
+function visit() {
+  let url = document.getElementById("url").value.trim();
+  if (!url) return;
+  if (!url.startsWith("http")) url = "https://" + url;
+  window.open(url, "_blank");
+}
+
+function openSite(url) {
+  window.open(url, "_blank");
+}
+
+// particles
+const c = document.getElementById("bg");
+const ctx = c.getContext("2d");
+c.width = innerWidth;
+c.height = innerHeight;
+
+const dots = Array.from({length:120},()=>({
+  x:Math.random()*c.width,
+  y:Math.random()*c.height,
+  vx:(Math.random()-.5)*0.5,
+  vy:(Math.random()-.5)*0.5
+}));
+
+function animate(){
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle="#00f0ff";
+  dots.forEach(d=>{
+    d.x+=d.vx; d.y+=d.vy;
+    if(d.x<0||d.x>c.width||d.y<0||d.y>c.height){
+      d.x=Math.random()*c.width;
+      d.y=Math.random()*c.height;
+    }
+    ctx.beginPath();
+    ctx.arc(d.x,d.y,2,0,Math.PI*2);
+    ctx.fill();
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>
+`);
 });
 
-app.listen(PORT, ()=>console.log(`ApolloOS running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log("ApolloOS running on port " + PORT)
+);
