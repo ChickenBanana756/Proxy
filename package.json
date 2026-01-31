@@ -1,17 +1,11 @@
 {
-  "name": "ApolloOS",
+  "name": "apolloos",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
-  "engines": {
-    "node": ">=18"
-  },
   "dependencies": {
-    "express": "^4.18.2",
-    "http-proxy-middleware": "^3.0.0",
-    "node-fetch": "^3.3.2"
+    "express": "^4.19.2"
   }
 }
