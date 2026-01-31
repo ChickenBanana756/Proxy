@@ -8,10 +8,7 @@ const PORT = process.env.PORT || 3000;
 // Proxy identifier
 const PROXY_ID = "ApolloOS";
 
-// Parse form data
-app.use(express.urlencoded({ extended: true }));
-
-// Home page with input
+// Serve home page with input box
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -34,9 +31,9 @@ app.get("/", (req, res) => {
   <body>
     <canvas id="particles"></canvas>
     <h1>ApolloOS</h1>
-    <p>Type a website URL and press Visit (only sites that allow ApolloOS will load)</p>
-    <form method="POST" action="/visit">
-      <input type="text" name="url" placeholder="https://example.com" required />
+    <p>Type a website URL and click Visit (only sites that allow ApolloOS will load)</p>
+    <form method="GET" action="/site">
+      <input type="text" name="target" placeholder="https://example.com" required />
       <input type="submit" value="Visit" />
     </form>
 
@@ -70,30 +67,16 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Handle form submission
-app.post("/visit", (req, res) => {
-  let siteUrl = req.body.url;
-  if (!siteUrl) return res.redirect("/");
-
-  // Ensure protocol is included
-  if (!/^https?:\/\//.test(siteUrl)) siteUrl = "http://" + siteUrl;
-
-  // Encode the URL as a query parameter
-  const encoded = encodeURIComponent(siteUrl);
-
-  // Redirect to proxy route
-  res.redirect(`/site?target=${encoded}`);
-});
-
-// Proxy route
+// Proxy route: GET /site?target=URL
 app.get("/site", async (req, res, next) => {
   let target = req.query.target;
   if (!target) return res.redirect("/");
 
-  target = decodeURIComponent(target);
+  // Add protocol if missing
+  if (!/^https?:\/\//.test(target)) target = "http://" + target;
 
   try {
-    // Check if target allows proxying
+    // Check for X-Allow-Proxy header
     const response = await fetch(target, { method: "HEAD" });
     const allowHeader = response.headers.get("x-allow-proxy");
 
