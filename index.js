@@ -25,13 +25,14 @@ body {
 canvas {
   position:fixed;
   inset:0;
+  z-index:0;
 }
 
-.container {
+.ui {
   position:relative;
   z-index:2;
   text-align:center;
-  margin-top:80px;
+  padding-top:40px;
 }
 
 h1 {
@@ -40,35 +41,23 @@ h1 {
 }
 
 input {
-  width:340px;
+  width:360px;
   padding:10px;
   font-family:'Press Start 2P';
 }
 
 button {
-  margin-left:10px;
   padding:10px 15px;
   font-family:'Press Start 2P';
   cursor:pointer;
 }
 
-.cards {
-  margin-top:40px;
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.card {
-  border:2px solid #00f0ff;
-  padding:15px;
-  cursor:pointer;
-}
-
-.card:hover {
-  background:#00f0ff;
-  color:black;
+iframe {
+  width:100%;
+  height:calc(100vh - 220px);
+  border:none;
+  margin-top:20px;
+  background:black;
 }
 </style>
 </head>
@@ -77,30 +66,24 @@ button {
 
 <canvas id="bg"></canvas>
 
-<div class="container">
+<div class="ui">
   <h1>ApolloOS</h1>
-  <p>Type a website or click a card</p>
+  <p>Powered by CroxyProxy</p>
 
   <input id="url" placeholder="https://coolmathgames.com">
-  <button onclick="visit()">Visit</button>
+  <button onclick="browse()">Visit</button>
 
-  <div class="cards">
-    <div class="card" onclick="openSite('https://www.coolmathgames.com')">CoolMathGames</div>
-    <div class="card" onclick="openSite('https://www.crazygames.com')">CrazyGames</div>
-    <div class="card" onclick="openSite('https://www.youtube.com')">YouTube</div>
-  </div>
+  <iframe id="browser"></iframe>
 </div>
 
 <script>
-function visit() {
+function browse(){
   let url = document.getElementById("url").value.trim();
-  if (!url) return;
-  if (!url.startsWith("http")) url = "https://" + url;
-  window.open(url, "_blank");
-}
+  if(!url) return;
+  if(!url.startsWith("http")) url = "https://" + url;
 
-function openSite(url) {
-  window.open(url, "_blank");
+  const croxyUrl = "https://www.croxyproxy.com/" + url;
+  document.getElementById("browser").src = croxyUrl;
 }
 
 // particles
