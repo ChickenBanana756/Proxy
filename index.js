@@ -5,14 +5,13 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Proxy identifier (must match X-Allow-Proxy header on allowed sites)
+// Proxy identifier
 const PROXY_ID = "ApolloOS";
 
-// Middleware to parse URL-encoded and JSON data (for future forms if needed)
+// Parse form data
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
-// Home page with video game font, black background, blue floating particles, and URL input
+// Home page with input
 app.get("/", (req, res) => {
   res.send(`
   <!DOCTYPE html>
@@ -35,8 +34,8 @@ app.get("/", (req, res) => {
   <body>
     <canvas id="particles"></canvas>
     <h1>ApolloOS</h1>
-    <p>Type a website URL and press Enter (only sites that allow ApolloOS will load)</p>
-    <form method="GET" action="/visit">
+    <p>Type a website URL and press Visit (only sites that allow ApolloOS will load)</p>
+    <form method="POST" action="/visit">
       <input type="text" name="url" placeholder="https://example.com" required />
       <input type="submit" value="Visit" />
     </form>
@@ -71,28 +70,30 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Handle the form submission (typed URL)
-app.get("/visit", (req, res) => {
-  let siteUrl = req.query.url;
+// Handle form submission
+app.post("/visit", (req, res) => {
+  let siteUrl = req.body.url;
   if (!siteUrl) return res.redirect("/");
 
-  // Prepend protocol if missing
+  // Ensure protocol is included
   if (!/^https?:\/\//.test(siteUrl)) siteUrl = "http://" + siteUrl;
 
-  // Encode URL as query parameter
+  // Encode the URL as a query parameter
   const encoded = encodeURIComponent(siteUrl);
+
+  // Redirect to proxy route
   res.redirect(`/site?target=${encoded}`);
 });
 
-// Proxy route (reads target URL from query parameter)
-app.use("/site", async (req, res, next) => {
+// Proxy route
+app.get("/site", async (req, res, next) => {
   let target = req.query.target;
   if (!target) return res.redirect("/");
 
   target = decodeURIComponent(target);
 
   try {
-    // Check owner permission header
+    // Check if target allows proxying
     const response = await fetch(target, { method: "HEAD" });
     const allowHeader = response.headers.get("x-allow-proxy");
 
@@ -114,7 +115,7 @@ app.use("/site", async (req, res, next) => {
   }
 });
 
-// Start the server
+// Start server
 app.listen(PORT, () => {
   console.log(`ApolloOS proxy running on port ${PORT}`);
 });
