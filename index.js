@@ -89,9 +89,6 @@ app.get("/site", async (req, res, next) => {
   try {
     const response = await fetch(target, { method: "HEAD" });
     const allowHeader = response.headers.get("x-allow-proxy");
-
-    if (allowHeader !== PROXY_ID) {
-      return res.status(403).send("⛔ This website has NOT opted in to be proxied.");
     }
 
     return createProxyMiddleware({
