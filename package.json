@@ -1,16 +1,12 @@
 {
   "name": "apolloos",
   "version": "1.0.0",
-  "description": "ApolloOS proxy with Ultraviolet and Bare server",
   "type": "module",
-  "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.19.2",
     "@tomphttp/bare-server-node": "^2.0.4"
-  },
-  "author": "YourName",
-  "license": "MIT"
+  }
 }
